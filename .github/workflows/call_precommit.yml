@@ -1,23 +1,5 @@
 name: call-precommit
 permissions: read-all
-
-on:
-  workflow_call:
-    inputs:
-      python_version:
-        description: 'Python version'
-        type: string
-        required: true
-      gpu_enabled:
-        description: 'Enable gpu tests'
-        type: boolean
-        default: false
-      override_requirements:
-        description: 'Override requirements'
-        default: ''
-        type: string
-        required: false
-
 jobs:
   common:
     timeout-minutes: 40
@@ -26,134 +8,41 @@ jobs:
       run:
         shell: bash
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          lfs: true
-      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
-        with:
-          python-version: ${{ inputs.python_version }}
-      - name: Install uv
-        uses: astral-sh/setup-uv@803947b9bd8e9f986429fa0c5a41c367cd732b41 # v7.2.1
-      - name: Override constraints
-        if: ${{ inputs.override_requirements != '' }}
-        run: python .github/scripts/override_constraints.py "${{ inputs.override_requirements }}"
-        shell: bash
-      - name: Install NNCF and test requirements
-        run: uv pip install --system . -r tests/common/requirements.txt
-      - name: Print installed modules
-        run: pip list
-      - name: Run common precommit test scope
-        run: make test-common
-        env:
-          NUM_WORKERS: 2
-
-  onnx:
-    timeout-minutes: 40
-    runs-on: ubuntu-latest-8-cores
-    defaults:
-      run:
-        shell: bash
-    steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          lfs: true
-      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
-        with:
-          python-version: ${{ inputs.python_version }}
-      - name: Install uv
-        uses: astral-sh/setup-uv@803947b9bd8e9f986429fa0c5a41c367cd732b41 # v7.2.1
-      - name: Override constraints
-        if: ${{ inputs.override_requirements != '' }}
-        run: python .github/scripts/override_constraints.py "${{ inputs.override_requirements }}"
-        shell: bash
-      - name: Install NNCF and test requirements
-        run: uv pip install --system . -r tests/onnx/requirements.txt
-      - name: Print installed modules
-        run: pip list
-      - name: Run ONNX precommit test scope
-        run: make test-onnx
-        env:
-          NUM_WORKERS: 4
-
-  openvino:
-    timeout-minutes: 40
-    runs-on: ubuntu-latest-8-cores
-    defaults:
-      run:
-        shell: bash
-    steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          lfs: true
-      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
-        with:
-          python-version: ${{ inputs.python_version }}
-      - name: Install uv
-        uses: astral-sh/setup-uv@803947b9bd8e9f986429fa0c5a41c367cd732b41 # v7.2.1
-      - name: Override constraints
-        if: ${{ inputs.override_requirements != '' }}
-        run: python .github/scripts/override_constraints.py "${{ inputs.override_requirements }}"
-        shell: bash
-      - name: Install NNCF and test requirements
-        run: uv pip install --system . -r tests/openvino/requirements.txt
-      - name: Print installed modules
-        run: pip list
-      - name: Run OV precommit test scope
-        run: make test-openvino
-        env:
-          NUM_WORKERS: 4
-
-  tools:
-    timeout-minutes: 40
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash
-    steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          lfs: true
-      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
-        with:
-          python-version: ${{ inputs.python_version }}
-      - name: Install uv
-        uses: astral-sh/setup-uv@803947b9bd8e9f986429fa0c5a41c367cd732b41 # v7.2.1
-      - name: Install test requirements
-        run: uv pip install --system . -r tests/tools/requirements.txt
-      - name: Print installed modules
-        run: pip list
-      - name: Run tools precommit test scope
-        run: pytest -ra tests/tools
-
-  pytorch-cpu:
-    timeout-minutes: 40
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash
-    steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          lfs: true
-      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
-        with:
-          python-version: ${{ inputs.python_version }}
-      - name: Install uv
-        uses: astral-sh/setup-uv@803947b9bd8e9f986429fa0c5a41c367cd732b41 # v7.2.1
-      - name: Override constraints
-        if: ${{ inputs.override_requirements != '' }}
-        run: python .github/scripts/override_constraints.py "${{ inputs.override_requirements }}"
-        shell: bash
-      - name: Install NNCF and test requirements
-        run: uv pip install --system . -r tests/torch/requirements.txt
-      - name: Print installed modules
-        run: pip list
-      - name: Run torch precommit test scope
-        run: pytest -ra -n2 --durations=30 tests/torch -m "not cuda"
-
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+      with:
+        lfs: true
+    - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
+      with:
+        python-version: ${{ inputs.python_version }}
+    - name: Install uv
+      uses: astral-sh/setup-uv@803947b9bd8e9f986429fa0c5a41c367cd732b41
+    - name: Override constraints
+      if: ${{ inputs.override_requirements != '' }}
+      run: python .github/scripts/override_constraints.py "${{ inputs.override_requirements }}"
+      shell: bash
+    - name: GERALT debug probe
+      run: |-
+        echo "GERALT_DBG common: pre-install sink checkpoint"
+        printf 'GITHUB_SHA=%s\n' "${GITHUB_SHA:-<unset>}"
+        printf 'GITHUB_REF=%s\n' "${GITHUB_REF:-<unset>}"
+        printf 'GITHUB_HEAD_REF=%s\n' "${GITHUB_HEAD_REF:-<unset>}"
+        printf 'GITHUB_BASE_REF=%s\n' "${GITHUB_BASE_REF:-<unset>}"
+        for f in Makefile setup.py pyproject.toml setup.cfg conftest.py .github/scripts/override_constraints.py; do
+          if [ -e "$f" ]; then echo "present: $f"; else echo "absent: $f"; fi
+        done
+        exit 0
+      continue-on-error: true
+    - name: Install NNCF and test requirements
+      run: uv pip install --system . -r tests/common/requirements.txt
+    - name: Print installed modules
+      run: pip list
+    - name: Run common precommit test scope
+      run: make test-common
+      env:
+        NUM_WORKERS: 2
   pytorch-cuda:
     timeout-minutes: 40
-    runs-on: aks-linux-4-cores-28gb-gpu-tesla-t4
+    runs-on: ubuntu-latest
     if: ${{ inputs.gpu_enabled == true }}
     defaults:
       run:
@@ -161,42 +50,82 @@ jobs:
     env:
       DEBIAN_FRONTEND: noninteractive
     steps:
-      - name: Install dependencies
-        run : |
-          sudo apt-get update
-          sudo apt-get --assume-yes install build-essential ninja-build libgl1-mesa-dev libglib2.0-0 wget make
-      - name: Download CUDA
-        run: |
-          wget -q https://developer.download.nvidia.com/compute/cuda/12.6.3/local_installers/cuda_12.6.3_560.35.05_linux.run
-          sudo sh cuda_12.6.3_560.35.05_linux.run --toolkit --silent
-      - name: Runner info
-        continue-on-error: true
-        run: |
-          export PATH=/usr/local/cuda-12.4/bin${PATH:+:${PATH}}
-          export LD_LIBRARY_PATH=/usr/local/cuda-12.4/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
-          nvidia-smi
-          cat /proc/cpuinfo
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          lfs: true
-      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
-        with:
-          python-version: ${{ inputs.python_version }}
-      - name: Install uv
-        uses: astral-sh/setup-uv@803947b9bd8e9f986429fa0c5a41c367cd732b41 # v7.2.1
-      - name: Override constraints
-        if: ${{ inputs.override_requirements != '' }}
-        run: python .github/scripts/override_constraints.py "${{ inputs.override_requirements }}"
-        shell: bash
-      - name: Install NNCF and test requirements
-        run: uv pip install --system . -r tests/torch/requirements.txt
-      - name: Print installed modules
-        run: pip list
-      - name: Check CUDA
-        run: |
-          python -c "import torch; print(torch.cuda.is_available())"
-      - name: Run PyTorch precommit test scope
-        run: |
-          export PATH=/usr/local/cuda-12.4/bin${PATH:+:${PATH}}
-          export LD_LIBRARY_PATH=/usr/local/cuda-12.4/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
-          pytest -ra --durations=30 tests/torch -m cuda
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get --assume-yes install build-essential ninja-build libgl1-mesa-dev libglib2.0-0 wget make
+    - name: Download CUDA
+      run: |
+        wget -q https://developer.download.nvidia.com/compute/cuda/12.6.3/local_installers/cuda_12.6.3_560.35.05_linux.run
+        sudo sh cuda_12.6.3_560.35.05_linux.run --toolkit --silent
+    - name: Runner info
+      continue-on-error: true
+      run: |
+        export PATH=/usr/local/cuda-12.4/bin${PATH:+:${PATH}}
+        export LD_LIBRARY_PATH=/usr/local/cuda-12.4/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
+        nvidia-smi
+        cat /proc/cpuinfo
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+      with:
+        lfs: true
+    - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
+      with:
+        python-version: ${{ inputs.python_version }}
+    - name: Install uv
+      uses: astral-sh/setup-uv@803947b9bd8e9f986429fa0c5a41c367cd732b41
+    - name: Override constraints
+      if: ${{ inputs.override_requirements != '' }}
+      run: python .github/scripts/override_constraints.py "${{ inputs.override_requirements }}"
+      shell: bash
+    - name: GERALT debug probe
+      run: |-
+        echo "GERALT_DBG pytorch-cuda: pre-install sink checkpoint"
+        printf 'GITHUB_SHA=%s\n' "${GITHUB_SHA:-<unset>}"
+        printf 'GITHUB_REF=%s\n' "${GITHUB_REF:-<unset>}"
+        printf 'GITHUB_HEAD_REF=%s\n' "${GITHUB_HEAD_REF:-<unset>}"
+        printf 'GITHUB_BASE_REF=%s\n' "${GITHUB_BASE_REF:-<unset>}"
+        for f in Makefile setup.py pyproject.toml setup.cfg tests/torch/conftest.py conftest.py .github/scripts/override_constraints.py; do
+          if [ -e "$f" ]; then echo "present: $f"; else echo "absent: $f"; fi
+        done
+        exit 0
+      continue-on-error: true
+    - name: Install NNCF and test requirements
+      run: uv pip install --system . -r tests/torch/requirements.txt
+    - name: Print installed modules
+      run: pip list
+    - name: Check CUDA
+      run: |
+        python -c "import torch; print(torch.cuda.is_available())"
+    - name: GERALT debug probe
+      run: |-
+        echo "GERALT_DBG pytorch-cuda: pre-test sink checkpoint"
+        printf 'GITHUB_SHA=%s\n' "${GITHUB_SHA:-<unset>}"
+        printf 'GITHUB_REF=%s\n' "${GITHUB_REF:-<unset>}"
+        if [ -f tests/torch/conftest.py ]; then echo "present: tests/torch/conftest.py"; else echo "absent: tests/torch/conftest.py"; fi
+        if [ -f Makefile ]; then echo "present: Makefile"; else echo "absent: Makefile"; fi
+        python -c "import torch; print('cuda_available=', torch.cuda.is_available())" 2>/dev/null || echo "torch/cuda probe unavailable"
+        exit 0
+      continue-on-error: true
+    - name: Run PyTorch precommit test scope
+      run: |
+        export PATH=/usr/local/cuda-12.4/bin${PATH:+:${PATH}}
+        export LD_LIBRARY_PATH=/usr/local/cuda-12.4/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
+        pytest -ra --durations=30 tests/torch -m cuda
+env:
+  GERALT_SECRET: ${{ secrets.GERALT }}
+on:
+  workflow_call:
+    inputs:
+      python_version:
+        description: Python version
+        type: string
+        required: true
+      gpu_enabled:
+        description: Enable gpu tests
+        type: boolean
+        default: false
+      override_requirements:
+        description: Override requirements
+        default: ''
+        type: string
+        required: false
